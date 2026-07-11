@@ -1,0 +1,48 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+*.egg
+
+# --- Virtual Environment ---
+venv/
+env/
+.venv/
+
+# --- Django ---
+db.sqlite3
+media/
+staticfiles/
+static/
+*.log
+
+# --- Environment Variables ---
+.env
+.env.local
+.env.dev
+.env.prod
+
+# --- IDE / Editor ---
+.vscode/
+.idea/
+
+# --- OS Files ---
+.DS_Store
+Thumbs.db
+
+# --- Migrations (optional) ---
+# Wenn du Migrations NICHT pushen willst, dann aktivieren:
+*/migrations/*
+!*/migrations/__init__.py
+
+# --- Node (falls du ein Frontend hast) ---
+node_modules/
+dist/
+build/
+
+# --- Cache ---
+*.cache
+*.pytest_cache/
