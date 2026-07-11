@@ -33,12 +33,11 @@ static/
 .DS_Store
 Thumbs.db
 
-# --- Migrations (optional) ---
-# Wenn du Migrations NICHT pushen willst, dann aktivieren:
+# --- Migrations ---
 */migrations/*
 !*/migrations/__init__.py
 
-# --- Node (falls du ein Frontend hast) ---
+# --- Node ---
 node_modules/
 dist/
 build/
