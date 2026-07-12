@@ -13,7 +13,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
 
 
-from .serializers import RegisterSerializer
+from .serializers import RegisterSerializer, PasswordResetConfirmSerializer
 
 
 
@@ -85,7 +85,7 @@ class LoginView(generics.GenericAPIView):
         refresh = RefreshToken.for_user(user)
         access_token = str(refresh.access_token)
 
-        response = Response({'detail': 'Login successful', 'user': {'id': user.id,'email': user.email, },},status=status.HTTP_200_OK)
+        response = Response({'detail': 'Login successful', 'user': {'id': user.id,'username': user.email, },},status=status.HTTP_200_OK)
 
         response.set_cookie('access_token', access_token, httponly=True, secure=False, samesite='Lax',)
         response.set_cookie('refresh_token', str(refresh), httponly=True, secure=False, samesite='Lax',)
@@ -177,11 +177,11 @@ class PasswordResetConfirmView(APIView):
 
         if not default_token_generator.check_token(user, token):
             return Response({'detail': 'Invalid or expired token.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        serializer = PasswordResetConfirmSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
-        new_password = request.data.get('password')
-        if not new_password:
-            return Response({'detail': 'Password is required.'}, status=status.HTTP_400_BAD_REQUEST)
-
+        new_password = request.data.get('new_password')
         user.set_password(new_password)
         user.save()
 
