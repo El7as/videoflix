@@ -67,7 +67,7 @@ class ActivateAccountView(generics.GenericAPIView):
 
 
 
-class LoginView(generics.GenericAPIView):
+class LoginView(APIView):
 
 
     def post(self, request, *args, **kwargs):

@@ -1,5 +1,6 @@
 import os
 
+from django.conf import settings
 from django.http import HttpResponse, Http404
 
 from rest_framework.views import APIView
@@ -25,15 +26,13 @@ class VideoListView(APIView):
 class VideoManifestView(APIView):
     permission_classes = [IsAuthenticated]
 
-
     def get(self, request, movie_id, resolution):
         try:
             video = Video.objects.get(id=movie_id)
         except Video.DoesNotExist:
             raise Http404("Video not found")
 
-        
-        manifest_path = os.path.join('media', 'videos', str(movie_id), resolution, 'index.m3u8')
+        manifest_path = os.path.join(settings.MEDIA_ROOT, 'videos', str(movie_id), resolution, 'index.m3u8')
 
         if not os.path.exists(manifest_path):
             raise Http404("Manifest not found")
@@ -48,20 +47,24 @@ class VideoManifestView(APIView):
 class VideoSegmentView(APIView):
     permission_classes = [IsAuthenticated]
 
-
     def get(self, request, movie_id, resolution, segment):
         try:
             video = Video.objects.get(id=movie_id)
         except Video.DoesNotExist:
             raise Http404("Video not found")
 
-       
-        segment_path = os.path.join('media', 'videos', str(movie_id), resolution, segment)
+        segment_path = os.path.join(settings.MEDIA_ROOT, 'videos', str(movie_id), resolution, segment)
 
         if not os.path.exists(segment_path):
             raise Http404("Segment not found")
 
-        with open(segment_path, 'rb') as f:
-            segment_data = f.read()
 
-        return HttpResponse(segment_data, content_type='video/MP2T')
+        def file_iterator(path, chunk_size=8192):
+            with open(path, 'rb') as f:
+                while True:
+                    chunk = f.read(chunk_size)
+                    if not chunk:
+                        break
+                    yield chunk
+
+        return HttpResponse(file_iterator(segment_path), content_type='video/MP2T')
