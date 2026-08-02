@@ -2,6 +2,26 @@ import os
 import subprocess
 
 def convert_to_hls_job(input_path, video_id):
+    """
+    Convert a video file into HLS format (HTTP Live Streaming)
+    with multiple resolutions: 480p, 720p, and 1080p.
+
+    This function:
+    - Creates a directory structure for the video
+    - Generates HLS playlists and segments for each resolution
+    - Uses FFmpeg to perform scaling and HLS packaging
+
+    Args:
+        input_path (str): Path to the original uploaded video file.
+        video_id (int): ID of the video, used to create a unique output folder.
+
+    Output structure:
+        /<video_id>/
+            /480p/index.m3u8
+            /720p/index.m3u8
+            /1080p/index.m3u8
+    """
+        
     base_dir = os.path.join(os.path.dirname(input_path), str(video_id))
     os.makedirs(base_dir, exist_ok=True)
 

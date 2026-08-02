@@ -22,9 +22,32 @@ User = get_user_model()
 
 
 class RegisterView(generics.CreateAPIView):
+    """
+    API endpoint for user registration.
+
+    This view:
+    - Validates incoming registration data
+    - Creates a new user
+    - Generates an activation token + UID
+    - Sends an activation email with a secure link
+    - Returns basic user info and the token
+    """
+
     serializer_class = RegisterSerializer
 
     def create(self, request, *args, **kwargs):
+        """
+        Handle POST requests to register a new user.
+
+        Steps:
+        1. Validate the incoming data using the serializer.
+        2. Save the new user instance.
+        3. Generate a UID and token for account activation.
+        4. Build an activation link.
+        5. Send an activation email.
+        6. Return a response containing user info and token.
+        """
+
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
@@ -46,9 +69,31 @@ class RegisterView(generics.CreateAPIView):
 
 
 class ActivateAccountView(generics.GenericAPIView):
+    """
+    Handles account activation via a GET request.
 
+    The activation link contains:
+    - uidb64: Base64-encoded user ID
+    - token: A time-sensitive activation token
+
+    When the user clicks the link:
+    - The UID is decoded
+    - The user is retrieved
+    - The token is validated
+    - The account is activated if valid
+    """
 
     def get(self, request, uidb64, token):
+        """
+        Process the activation link.
+
+        Steps:
+        1. Decode the UID from base64.
+        2. Retrieve the corresponding user.
+        3. Validate the token.
+        4. Activate the user if valid.
+        """
+
         try:
             
             uid = force_str(urlsafe_base64_decode(uidb64))
@@ -68,9 +113,30 @@ class ActivateAccountView(generics.GenericAPIView):
 
 
 class LoginView(APIView):
+    """
+    Handles user login using email + password.
 
+    This view:
+    - Validates login input
+    - Authenticates the user
+    - Checks activation status
+    - Generates JWT access + refresh tokens
+    - Stores both tokens in HTTP-only cookies
+    """
 
     def post(self, request, *args, **kwargs):
+        """
+        Process login requests.
+
+        Steps:
+        1. Extract email and password.
+        2. Validate input.
+        3. Authenticate user.
+        4. Check if account is activated.
+        5. Generate JWT tokens.
+        6. Set tokens in secure cookies.
+        7. Return user info.
+        """
         email = request.data.get('email')
         password = request.data.get('password')
 
@@ -95,9 +161,26 @@ class LoginView(APIView):
 
 
 class LogoutView(APIView):
+    """
+    Handles user logout by:
+    - Reading the refresh token from cookies
+    - Blacklisting the refresh token (invalidating it)
+    - Optionally updating the user's last logout timestamp
+    - Clearing authentication cookies
+    """
 
 
     def post(self, request, *args, **kwargs):
+        """
+        Process logout requests.
+
+        Steps:
+        1. Retrieve refresh token from cookies.
+        2. Validate and blacklist the token.
+        3. Update user's logout timestamp (optional).
+        4. Delete JWT cookies.
+        5. Return confirmation response.
+        """
         refresh_token = request.COOKIES.get('refresh_token')
 
         if not refresh_token:
@@ -120,7 +203,15 @@ class LogoutView(APIView):
 
 
 class RefreshTokenView(APIView):
+    """
+    Provides a new access token using the refresh token stored in cookies.
 
+    This view:
+    - Reads the refresh token from the user's cookies
+    - Validates the refresh token
+    - Generates a new access token
+    - Stores the new access token in an HTTP-only cookie
+    """
 
     def post(self, request, *args, **kwargs):
         refresh_token = request.COOKIES.get('refresh_token')
@@ -143,6 +234,16 @@ class RefreshTokenView(APIView):
 
 class PasswordResetView(APIView):
     def post(self, request, *args, **kwargs):
+        """
+        Handle POST requests to refresh the access token.
+
+        Steps:
+        1. Retrieve refresh token from cookies.
+        2. Validate the refresh token.
+        3. Generate a new access token.
+        4. Set the new access token in a secure cookie.
+        5. Return the new token in the response body.
+        """
         email = request.data.get('email')
 
         if not email:
@@ -166,9 +267,32 @@ class PasswordResetView(APIView):
 
 
 class PasswordResetConfirmView(APIView):
+    """
+    Handles password reset confirmation.
+
+    This view is triggered when the user clicks the password reset link
+    sent to their email. The link contains:
+    - uidb64: Base64-encoded user ID
+    - token: A time-sensitive password reset token
+
+    The view:
+    - Validates the UID and token
+    - Validates the new password via serializer
+    - Updates the user's password
+    """
 
 
     def post(self, request, uidb64, token, *args, **kwargs):
+        """
+        Process the password reset confirmation.
+
+        Steps:
+        1. Decode UID from base64.
+        2. Retrieve the user.
+        3. Validate the token.
+        4. Validate the new password.
+        5. Save the new password.
+        """
         try:
             uid = urlsafe_base64_decode(uidb64).decode()
             user = User.objects.get(pk=uid)

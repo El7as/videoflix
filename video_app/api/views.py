@@ -14,9 +14,21 @@ from .serializers import VideoSerializer
 
 
 class VideoListView(APIView):
+    """
+    Returns a list of all videos in the system.
+
+    Requirements:
+    - User must be authenticated (JWT cookie)
+    - Videos are ordered newest → oldest
+    """
+        
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        """
+        Fetch all videos and serialize them.
+        """
+                
         videos = Video.objects.all().order_by('-created_at')
         serializer = VideoSerializer(videos, many=True)
         return Response(serializer.data)
@@ -24,9 +36,20 @@ class VideoListView(APIView):
 
 
 class VideoManifestView(APIView):
+    """
+    Serves the HLS manifest (index.m3u8) for a given video and resolution.
+
+    Requirements:
+    - User must be authenticated
+    - The manifest must exist in MEDIA_ROOT/videos/<movie_id>/<resolution>/index.m3u8
+    """
     permission_classes = [IsAuthenticated]
 
     def get(self, request, movie_id, resolution):
+        """
+        Return the HLS playlist file (.m3u8) as plain text.
+        """
+                
         try:
             video = Video.objects.get(id=movie_id)
         except Video.DoesNotExist:
@@ -45,9 +68,20 @@ class VideoManifestView(APIView):
 
 
 class VideoSegmentView(APIView):
+    """
+    Serves individual HLS video segments (.ts files).
+
+    Requirements:
+    - User must be authenticated
+    - Segment must exist in:
+      MEDIA_ROOT/videos/<movie_id>/<resolution>/<segment>.ts
+    """
     permission_classes = [IsAuthenticated]
 
     def get(self, request, movie_id, resolution, segment):
+        """
+        Stream the requested HLS segment in chunks.
+        """
         try:
             video = Video.objects.get(id=movie_id)
         except Video.DoesNotExist:
@@ -60,6 +94,8 @@ class VideoSegmentView(APIView):
 
 
         def file_iterator(path, chunk_size=8192):
+            """
+            Chunked file iterator for efficient streaming"""
             with open(path, 'rb') as f:
                 while True:
                     chunk = f.read(chunk_size)

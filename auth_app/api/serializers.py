@@ -10,6 +10,15 @@ User = get_user_model()
 
 
 class RegisterSerializer(serializers.ModelSerializer):
+    """
+    Serializer used for user registration.
+
+    Responsibilities:
+    - Validate password + confirmed_password match
+    - Apply Django's built‑in password validators
+    - Create a new inactive user (activation required)
+    """
+        
     confirmed_password = serializers.CharField(write_only=True)
     password = serializers.CharField(write_only=True, validators=[validate_password])
 
@@ -19,12 +28,26 @@ class RegisterSerializer(serializers.ModelSerializer):
 
 
     def validate(self, data):
+        """
+        Ensure both password fields match.
+        """
+                
         if data['password'] != data['confirmed_password']:
             raise serializers.ValidationError({'password': 'Passwords do not match.'})
         return data
 
 
     def create(self, validated_data):
+        """
+        Create a new inactive user.
+
+        Steps:
+        1. Remove confirmed_password (not stored in DB)
+        2. Extract email + password
+        3. Create user with username derived from email prefix
+        4. Mark user as inactive until email activation
+        """
+
         validated_data.pop('confirmed_password')
         email = validated_data['email']
         password = validated_data['password']
@@ -37,6 +60,15 @@ class RegisterSerializer(serializers.ModelSerializer):
 
 
 class PasswordResetConfirmSerializer(serializers.Serializer):
+    """
+    Serializer used to validate password reset confirmation input.
+
+    Responsibilities:
+    - Ensure both password fields are provided
+    - Ensure they match
+    - Enforce minimum length (handled by CharField)
+    """
+
     new_password = serializers.CharField(write_only=True, min_length=8)
     confirm_password = serializers.CharField(write_only=True, min_length=8)
 
