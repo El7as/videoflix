@@ -47,11 +47,12 @@ Persistent media volume
 ## Running the Project with Docker
 
 
-1 Build and start all services
+1. Build and start all services
 ```
 docker-compose up --build
 ```
-2 Containers
+
+2. Containers
 
 Container	Description
 web	Django backend + FFmpeg
