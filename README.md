@@ -9,22 +9,22 @@ Includes secure cookie‑based JWT authentication, password reset flows, and bac
 
 ### Authentication
 
-- User registration with password validation
-- Email activation
-- Login with HTTP‑Only JWT cookies
-- Refresh token endpoint
-- Logout
-- Password reset (request + confirm)
+User registration with password validation
+Email activation
+Login with HTTP‑Only JWT cookies
+Refresh token endpoint
+Logout
+Password reset (request + confirm)
 
 
 ### Video Management
 
-- Upload videos
-- Automatic FFmpeg conversion into: 480p, 720p, 1080p
-- HLS output: index.m3u8, .ts segments
-- Streaming endpoints for manifests and segments
-- Thumbnail upload
-- Video metadata (title, description, category)
+Upload videos
+Automatic FFmpeg conversion into: 480p, 720p, 1080p
+HLS output: index.m3u8, .ts segments
+Streaming endpoints for manifests and segments
+Thumbnail upload
+Video metadata (title, description, category)
 
 
 ### Background Processing
@@ -86,10 +86,9 @@ API serves the manifest and segments
 ## Example Output
 
 media/videos/42/
-├── 480p/index.m3u8
-├── 480p/segment0.ts
-├── 720p/index.m3u8
-├── 1080p/index.m3u8
+480p/index.m3u8
+720p/index.m3u8
+1080p/index.m3u8
 
 
 
@@ -115,26 +114,33 @@ GET	/video/<id>/<resolution>/<segment>.ts	HLS segment
 ## JWT via Cookies
 
 
-Access Token
+### Access Token
 
 Short‑lived
 Stored in HTTP‑Only cookie
 
-Refresh Token
+
+### Refresh Token
 
 Longer lifetime
 Used to generate new access tokens
 
 ## Development Commands
+
 Apply migrations
+
 ```
 docker-compose exec web python manage.py migrate
 ```
+
 Create superuser
+
 ```
 docker-compose exec web python manage.py createsuperuser
 ```
+
 Run tests
+
 ```
 docker-compose exec web python manage.py test
 ```
