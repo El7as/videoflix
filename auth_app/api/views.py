@@ -266,7 +266,7 @@ class PasswordResetView(APIView):
 
 
 
-class PasswordResetConfirmView(APIView):
+class PasswordConfirmView(APIView):
     """
     Handles password reset confirmation.
 

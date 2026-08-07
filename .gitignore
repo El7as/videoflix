@@ -34,7 +34,6 @@ static/
 Thumbs.db
 
 # --- Migrations ---
-*/migrations/*
 !*/migrations/__init__.py
 
 # --- Node ---
@@ -45,3 +44,4 @@ build/
 # --- Cache ---
 *.cache
 *.pytest_cache/
+Fehler.txt

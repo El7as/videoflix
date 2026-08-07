@@ -96,12 +96,12 @@ media/videos/42/
 ## API Endpoints
 Authentication
 Method	Endpoint	Description
-POST	/auth/register/	Register a new user
-POST	/auth/login/	Login (JWT cookies)
-POST	/auth/logout/	Logout
-POST	/auth/token/refresh/	Refresh access token
-POST	/auth/password_reset/	Request password reset
-POST	/auth/password_reset_confirm/<uid>/<token>/	Set new password
+POST	/api/register/	Register a new user
+POST	/api/login/	Login (JWT cookies)
+POST	/api/logout/	Logout
+POST	/api/token/refresh/	Refresh access token
+POST	/api/password_reset/	Request password reset
+POST	/api/password_confirm/<uid>/<token>/	Set new password
 
 
 ## Videos
