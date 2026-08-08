@@ -1,6 +1,7 @@
 import os
 import subprocess
 import logging
+from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +26,7 @@ def convert_to_hls_job(input_path, video_id):
             /1080p/index.m3u8
     """
         
-    base_dir = os.path.join(os.path.dirname(input_path), str(video_id))
+    base_dir = os.path.join(settings.MEDIA_ROOT, 'videos', str(video_id))
     os.makedirs(base_dir, exist_ok=True)
 
     resolutions = {

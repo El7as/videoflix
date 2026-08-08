@@ -23,8 +23,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Basic Settings
 SECRET_KEY = os.getenv('SECRET_KEY', default='django-insecure-@@u&2wg3g+r*&zosv@_j^r@7jndgs1gsu2bngnftn6#9h2fvss')
-DEBUG = True
-ALLOWED_HOSTS = []
+DEBUG = os.getenv('DEBUG', 'True') == 'True'
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')
 AUTH_USER_MODEL = 'auth_app.User'
 
 # Cors
@@ -85,34 +85,31 @@ WSGI_APPLICATION = 'core.wsgi.application'
 
 # DATABASES
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': os.environ.get('DB_NAME', default='videoflix_db'),
-#         'USER': os.environ.get('DB_USER', default='videoflix_user'),
-#         'PASSWORD': os.environ.get('DB_PASSWORD', default='supersecretpassword'),
-#         'HOST': os.environ.get('DB_HOST', default='db'),
-#         'PORT': os.environ.get('DB_PORT', default=5432),
-#     }
-# }
-
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get('DB_NAME', default='videoflix_db'),
+        'USER': os.environ.get('DB_USER', default='videoflix_user'),
+        'PASSWORD': os.environ.get('DB_PASSWORD', default='supersecretpassword'),
+        'HOST': os.environ.get('DB_HOST', default='db'),
+        'PORT': os.environ.get('DB_PORT', default=5432),
     }
 }
 
 
 # E-MAIL
 
+def _env_bool(name, default='False'):
+    return os.getenv(name, default).lower() in ('true', '1', 'yes', 'on')
+
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
 EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
-EMAIL_USE_TLS = True
+EMAIL_USE_TLS = _env_bool('EMAIL_USE_TLS', 'True')
+EMAIL_USE_SSL = _env_bool('EMAIL_USE_TLS', 'True')
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
-DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'noreply@videoflix.local')
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 
 
@@ -169,19 +166,11 @@ SIMPLE_JWT = {
 
 # REDIS / RQ
 
-# RQ_QUEUES = {
-#     'default': {
-#         'HOST': os.getenv('REDIS_HOST', 'redis'),
-#         'PORT': int(os.getenv('REDIS_PORT', 6379)),
-#         'DB': int(os.getenv('REDIS_DB', 0)),
-#         'DEFAULT_TIMEOUT': 900,
-#     }}
-
 RQ_QUEUES = {
     'default': {
-        'HOST': 'localhost',
-        'PORT': 6379,
-        'DB': 0,
+        'HOST': os.getenv('REDIS_HOST', 'redis'),
+        'PORT': int(os.getenv('REDIS_PORT', 6379)),
+        'DB': int(os.getenv('REDIS_DB', 0)),
         'DEFAULT_TIMEOUT': 900,
-    }}
-
+    }
+}

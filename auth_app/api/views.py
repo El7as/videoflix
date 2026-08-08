@@ -55,11 +55,12 @@ class RegisterView(generics.CreateAPIView):
         uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
         token = default_token_generator.make_token(user)
 
-        activation_link = request.build_absolute_uri(f"/api/activate/{uidb64}/{token}/")
+        # activation_link = request.build_absolute_uri(f"/api/activate/{uidb64}/{token}/")
+        activation_link = f'{settings.FRONTEND_URL}/pages/auth/activate.html?uid={uidb64}&token={token}'
 
         send_mail(
             subject='Activate your account',
-            message=f'Hi {user.email}, please activate your account:\n{activation_link}',
+            message=f'Hi {user.email}, please activate your account: \n{activation_link}',
             from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=[user.email],
             fail_silently=False,)
@@ -256,7 +257,8 @@ class PasswordResetView(APIView):
 
         uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
         token = default_token_generator.make_token(user)
-        reset_link = request.build_absolute_uri(f'/api/password_reset_confirm/{uidb64}/{token}/')
+        # reset_link = request.build_absolute_uri(f'/api/password_reset_confirm/{uidb64}/{token}/')
+        reset_link =(f'{settings.FRONTEND_URL}/pages/auth/confirm_password.html?uid={uidb64}&token={token}')
 
         send_mail(subject='Reset your password',
             message=f'Hi {user.email}, click the link to reset your password: {reset_link}',

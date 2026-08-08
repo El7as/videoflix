@@ -16,6 +16,8 @@ class VideoSerializer(serializers.ModelSerializer):
     Note:
     The actual video file and HLS output are not exposed here.
     """
+
+    thumbnail_url = serializers.ImageField(source='thumbnail', use_url=True)
         
     class Meta:
         model = Video
