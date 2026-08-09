@@ -1,48 +1,15 @@
 import os
 
 from django.conf import settings
-from django.http import FileResponse, HttpResponse, Http404
+from django.http import HttpResponse, Http404
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.decorators import api_view, permission_classes
 
 
 from ..models import Video
 from .serializers import VideoSerializer
-
-
-
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def serve_hls(request, video_id, resolution, filename):
-    """
-    Universally serves HLS manifests (.m3u8) and segments (.ts)
-    Requirements:
-    - User must be authenticated (JWT)
-    - File must exist in MEDIA_ROOT/videos/<video_id>/<resolution>/<filename>
-    """
-    file_path = os.path.join(
-        settings.MEDIA_ROOT,
-        'videos',
-        str(video_id),
-        resolution,
-        filename
-    )
-
-    print("Looking for:", file_path)
-
-    if os.path.exists(file_path):
-        content_type = (
-            'application/vnd.apple.mpegurl'
-            if filename.endswith('.m3u8')
-            else 'video/mp2t'
-        )
-        return FileResponse(open(file_path, 'rb'), content_type=content_type)
-
-    raise Http404("HLS file not found")
-
 
 
 

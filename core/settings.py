@@ -26,6 +26,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', default='django-insecure-@@u&2wg3g+r*&zosv@
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')
 AUTH_USER_MODEL = 'auth_app.User'
+FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://127.0.0.1:5500')
 
 # Cors
 CORS_ALLOW_CREDENTIALS = True

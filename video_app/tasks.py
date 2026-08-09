@@ -40,13 +40,27 @@ def convert_to_hls_job(input_path, video_id):
         os.makedirs(output_dir, exist_ok=True)
         output_path = os.path.join(output_dir, "index.m3u8")
 
+        # cmd = [
+        #     "ffmpeg", "-i", input_path,
+        #     "-vf", scale,
+        #     "-profile:v", "baseline", "-level", "3.0",
+        #     "-start_number", "0", "-hls_time", "10", "-hls_list_size", "0",
+        #     "-f", "hls", output_path
+        # ]
+
         cmd = [
             "ffmpeg", "-i", input_path,
             "-vf", scale,
             "-profile:v", "baseline", "-level", "3.0",
-            "-start_number", "0", "-hls_time", "10", "-hls_list_size", "0",
-            "-f", "hls", output_path
-        ]
+            "-start_number", "0",
+            "-hls_time", "10",
+            "-hls_list_size", "0",
+            "-hls_segment_filename", os.path.join(output_dir, "segment_%03d.ts"),
+            "-f", "hls",
+            output_path]
+
+
+
 
         try:
             subprocess.run(cmd, check=True, capture_output=True, text=True)
@@ -57,3 +71,8 @@ def convert_to_hls_job(input_path, video_id):
                 video_id, res, e.stderr
             )
             raise
+
+
+
+
+        
