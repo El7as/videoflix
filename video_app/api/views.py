@@ -30,7 +30,7 @@ class VideoListView(APIView):
         """
                 
         videos = Video.objects.all().order_by('-created_at')
-        serializer = VideoSerializer(videos, many=True)
+        serializer = VideoSerializer(videos, many=True, context={'request': request})
         return Response(serializer.data)
 
 

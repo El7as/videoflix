@@ -28,12 +28,19 @@ ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')
 AUTH_USER_MODEL = 'auth_app.User'
 FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://127.0.0.1:5500')
 
+# LOGGING
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {'console': {'class': 'logging.StreamHandler'}},
+    'root': {'handlers': ['console'], 'level': 'INFO'},
+}
+
 # Cors
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_ALL_ORIGINS = True
 
 # INSTALLED_APPS
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -85,7 +92,6 @@ WSGI_APPLICATION = 'core.wsgi.application'
 
 
 # DATABASES
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -99,7 +105,6 @@ DATABASES = {
 
 
 # E-MAIL
-
 def _env_bool(name, default='False'):
     return os.getenv(name, default).lower() in ('true', '1', 'yes', 'on')
 
@@ -107,16 +112,15 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
 EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
 EMAIL_USE_TLS = _env_bool('EMAIL_USE_TLS', 'True')
-EMAIL_USE_SSL = _env_bool('EMAIL_USE_TLS', 'True')
+EMAIL_USE_SSL = _env_bool('EMAIL_USE_SSL', 'False')
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'noreply@videoflix.local')
 
 
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
-
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',},
@@ -127,7 +131,6 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
-
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 USE_I18N = True
@@ -136,7 +139,6 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
-
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'static'
 
@@ -166,7 +168,6 @@ SIMPLE_JWT = {
 }
 
 # REDIS / RQ
-
 RQ_QUEUES = {
     'default': {
         'HOST': os.getenv('REDIS_HOST', 'redis'),
