@@ -29,7 +29,7 @@ class Video(models.Model):
     category = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
 
-    resolution = models.CharField(max_length=20, choices=[('480p', '480p'), ('720p', '720p'), ('1080p', '1080p'),], default='720p')
+    resolution = models.CharField(max_length=20, choices=[('480p', '480p'), ('720p', '720p'), ('1080p', '1080p'),], blank=True, null=True)
 
 
     def __str__(self):
@@ -53,3 +53,4 @@ def enqueue_conversion(sender, instance, created, **kwargs):
     if created:
         queue = django_rq.get_queue('default')
         queue.enqueue(convert_to_hls_job, instance.file.path, instance.id)
+        

@@ -106,5 +106,3 @@ class VideoSegmentView(APIView):
         return HttpResponse(file_iterator(segment_path), content_type='video/MP2T')
 
 
-
-

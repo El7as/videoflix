@@ -43,6 +43,16 @@ FFmpeg included in the web/worker images
 Persistent media volume
 
 
+## Environment Variables
+
+Create a .env file:
+SECRET_KEY=your_secret_key
+DEBUG=True
+ALLOWED_HOSTS=*
+EMAIL_HOST=smtp.example.com
+EMAIL_HOST_USER=your@mail.com
+EMAIL_HOST_PASSWORD=password
+
 
 ## Running the Project with Docker
 
@@ -59,18 +69,6 @@ web	Django backend + FFmpeg
 redis	Queue backend for django‑rq
 worker	Executes FFmpeg conversion jobs
 nginx (optional)	Can be added for optimized streaming
-
-
-
-## Environment Variables
-
-Create a .env file:
-SECRET_KEY=your_secret_key
-DEBUG=True
-ALLOWED_HOSTS=*
-EMAIL_HOST=smtp.example.com
-EMAIL_HOST_USER=your@mail.com
-EMAIL_HOST_PASSWORD=password
 
 
 

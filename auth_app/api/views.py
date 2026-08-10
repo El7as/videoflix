@@ -3,7 +3,8 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth import authenticate, get_user_model
-from django.core.mail import send_mail
+from django.core.mail import EmailMultiAlternatives # send_mail
+from django.template.loader import render_to_string
 from django.conf import settings
 
 from rest_framework import generics, status
@@ -32,7 +33,6 @@ class RegisterView(generics.CreateAPIView):
     - Sends an activation email with a secure link
     - Returns basic user info and the token
     """
-
     serializer_class = RegisterSerializer
 
     def create(self, request, *args, **kwargs):
@@ -57,12 +57,29 @@ class RegisterView(generics.CreateAPIView):
 
         activation_link = f'{settings.FRONTEND_URL}/pages/auth/activate.html?uid={uidb64}&token={token}'
 
-        send_mail(
+        html_content = render_to_string('emails/confirm_email.html', {
+            'activation_link': activation_link,
+            'user_name': user.first_name or user.username,
+            'static_url': settings.STATIC_URL,
+        })
+
+        text_content = f'Hi {user.email}, please activate your account: {activation_link}'
+
+        msg = EmailMultiAlternatives(
             subject='Activate your account',
-            message=f'Hi {user.email}, please activate your account: \n{activation_link}',
+            body=text_content,
             from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[user.email],
-            fail_silently=False,)
+            to=[user.email]
+        )
+        msg.attach_alternative(html_content, "text/html")
+        msg.send()
+
+        # send_mail(
+        #     subject='Activate your account',
+        #     message=f'Hi {user.email}, please activate your account: \n{activation_link}',
+        #     from_email=settings.DEFAULT_FROM_EMAIL,
+        #     recipient_list=[user.email],
+        #     fail_silently=False,)
 
         return Response({'user': {'id': user.id, 'email': user.email}, 'token': token}, status=status.HTTP_201_CREATED)
 
@@ -258,9 +275,19 @@ class PasswordResetView(APIView):
         token = default_token_generator.make_token(user)
         reset_link =(f'{settings.FRONTEND_URL}/pages/auth/confirm_password.html?uid={uidb64}&token={token}')
 
-        send_mail(subject='Reset your password',
-            message=f'Hi {user.email}, click the link to reset your password: {reset_link}',
-            from_email=settings.DEFAULT_FROM_EMAIL, recipient_list=[user.email],)
+        html_content = render_to_string('emails/password_reset_email.html', {'reset_link': reset_link, 'static_url': settings.STATIC_URL, 'frontend_url': settings.FRONTEND_URL,})
+
+        text_content = f'Hi {user.email}, click the link to reset your password: {reset_link}'
+
+        msg = EmailMultiAlternatives(subject='Reset your password', body=text_content, from_email=settings.DEFAULT_FROM_EMAIL, to=[user.email],)
+
+        msg.attach_alternative(html_content, "text/html")
+        msg.send()
+
+
+        # send_mail(subject='Reset your password',
+        #     message=f'Hi {user.email}, click the link to reset your password: {reset_link}',
+        #     from_email=settings.DEFAULT_FROM_EMAIL, recipient_list=[user.email],)
 
         return Response({'detail': 'An email has been sent to reset your password.'}, status=status.HTTP_200_OK)
 
