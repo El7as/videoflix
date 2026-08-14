@@ -1,11 +1,14 @@
+import os, base64, logging
+
 from django.utils import timezone
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth import authenticate, get_user_model
-from django.core.mail import EmailMultiAlternatives # send_mail
+from django.core.mail import EmailMultiAlternatives 
 from django.template.loader import render_to_string
 from django.conf import settings
+
 
 from rest_framework import generics, status
 from rest_framework.views import APIView
@@ -19,7 +22,7 @@ from .serializers import RegisterSerializer, PasswordResetConfirmSerializer
 
 
 User = get_user_model()
-
+logger = logging.getLogger(__name__)
 
 
 class RegisterView(generics.CreateAPIView):
@@ -57,11 +60,13 @@ class RegisterView(generics.CreateAPIView):
 
         activation_link = f'{settings.FRONTEND_URL}/pages/auth/activate.html?uid={uidb64}&token={token}'
 
+        with open(os.path.join(settings.BASE_DIR, 'static/images/videoflix_logo.jpg'), 'rb') as f:
+            logo_base64 = base64.b64encode(f.read()).decode('utf-8')
+
         html_content = render_to_string('emails/confirm_email.html', {
             'activation_link': activation_link,
             'user_name': user.first_name or user.username,
-            'static_url': settings.STATIC_URL,
-        })
+            'logo_base64': logo_base64,})
 
         text_content = f'Hi {user.email}, please activate your account: {activation_link}'
 
@@ -73,13 +78,6 @@ class RegisterView(generics.CreateAPIView):
         )
         msg.attach_alternative(html_content, "text/html")
         msg.send()
-
-        # send_mail(
-        #     subject='Activate your account',
-        #     message=f'Hi {user.email}, please activate your account: \n{activation_link}',
-        #     from_email=settings.DEFAULT_FROM_EMAIL,
-        #     recipient_list=[user.email],
-        #     fail_silently=False,)
 
         return Response({'user': {'id': user.id, 'email': user.email}, 'token': token}, status=status.HTTP_201_CREATED)
 
@@ -248,18 +246,18 @@ class RefreshTokenView(APIView):
 
 
 
-
 class PasswordResetView(APIView):
     def post(self, request, *args, **kwargs):
         """
-        Handle POST requests to refresh the access token.
+        Handle POST requests to initiate a password reset.
 
         Steps:
-        1. Retrieve refresh token from cookies.
-        2. Validate the refresh token.
-        3. Generate a new access token.
-        4. Set the new access token in a secure cookie.
-        5. Return the new token in the response body.
+        1. Validate email.
+        2. Generate UID and token.
+        3. Build reset link.
+        4. Embed logo and render HTML email.
+        5. Send password reset email.
+        6. Return generic success response.
         """
         email = request.data.get('email')
 
@@ -275,19 +273,22 @@ class PasswordResetView(APIView):
         token = default_token_generator.make_token(user)
         reset_link =(f'{settings.FRONTEND_URL}/pages/auth/confirm_password.html?uid={uidb64}&token={token}')
 
-        html_content = render_to_string('emails/password_reset_email.html', {'reset_link': reset_link, 'static_url': settings.STATIC_URL, 'frontend_url': settings.FRONTEND_URL,})
+        with open(os.path.join(settings.BASE_DIR, 'static/images/videoflix_logo.jpg'), 'rb') as f:
+            logo_base64 = base64.b64encode(f.read()).decode('utf-8')
+
+        html_content = render_to_string('emails/password_reset_email.html',{
+            'reset_link': reset_link, 
+            'logo_base64': logo_base64,})
 
         text_content = f'Hi {user.email}, click the link to reset your password: {reset_link}'
 
         msg = EmailMultiAlternatives(subject='Reset your password', body=text_content, from_email=settings.DEFAULT_FROM_EMAIL, to=[user.email],)
 
-        msg.attach_alternative(html_content, "text/html")
-        msg.send()
-
-
-        # send_mail(subject='Reset your password',
-        #     message=f'Hi {user.email}, click the link to reset your password: {reset_link}',
-        #     from_email=settings.DEFAULT_FROM_EMAIL, recipient_list=[user.email],)
+        msg.attach_alternative(html_content, 'text/html')
+        try:
+            msg.send()
+        except Exception as e:
+            logger.error(f'Password reset email failed {e}')
 
         return Response({'detail': 'An email has been sent to reset your password.'}, status=status.HTTP_200_OK)
 
