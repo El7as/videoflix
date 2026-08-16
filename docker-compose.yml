@@ -22,7 +22,6 @@ services:
       dockerfile: backend.Dockerfile
     env_file: .env
     container_name: videoflix_backend
-
     volumes:
       - .:/app
       - videoflix_media:/app/media
@@ -34,6 +33,16 @@ services:
     depends_on:
       - db
       - redis
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend.Dockerfile
+    container_name: videoflix_frontend
+    ports:
+      - '5500:80'
+    volumes:
+      - ./Frontend:/usr/share/nginx/html
 
 
 
