@@ -34,18 +34,6 @@ services:
       - db
       - redis
 
-  frontend:
-    build:
-      context: .
-      dockerfile: frontend.Dockerfile
-    container_name: videoflix_frontend
-    ports:
-      - '5500:80'
-    volumes:
-      - ./Frontend:/usr/share/nginx/html
-
-
-
 
 volumes:
   postgres_data:
