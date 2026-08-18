@@ -72,6 +72,17 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
     new_password = serializers.CharField(write_only=True, min_length=8)
     confirm_password = serializers.CharField(write_only=True, min_length=8)
 
+    def validate_new_password(self, value):
+        """
+        Validate the new password using Django's built-in validators.
+        """
+        try:
+            validate_password(value)
+        except serializers.ValidationError as e:
+            raise serializers.ValidationError(list(e.messages))
+        return value
+
+
     def validate(self, attrs):
         if attrs['new_password'] != attrs['confirm_password']:
             raise serializers.ValidationError({'detail': 'Passwords do not match.'})

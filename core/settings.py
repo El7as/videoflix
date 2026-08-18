@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
-import os
+import os, base64
 from dotenv import load_dotenv
 from datetime import timedelta
 
@@ -139,6 +139,11 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
+
+LOGO_PATH = os.path.join(BASE_DIR, 'static/images/videoflix_logo.jpg')
+with open(LOGO_PATH, 'rb') as f:
+    LOGO_BASE64 = base64.b64encode(f.read()).decode('utf-8')
+
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'static'
 

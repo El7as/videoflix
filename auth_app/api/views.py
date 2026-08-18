@@ -1,4 +1,4 @@
-import os, base64, logging
+import os, logging
 
 from django.utils import timezone
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
@@ -13,6 +13,7 @@ from django.conf import settings
 from rest_framework import generics, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
 
@@ -23,6 +24,7 @@ from .serializers import RegisterSerializer, PasswordResetConfirmSerializer
 
 User = get_user_model()
 logger = logging.getLogger(__name__)
+
 
 
 class RegisterView(generics.CreateAPIView):
@@ -37,6 +39,7 @@ class RegisterView(generics.CreateAPIView):
     - Returns basic user info and the token
     """
     serializer_class = RegisterSerializer
+    permission_classes = [AllowAny]
 
     def create(self, request, *args, **kwargs):
         """
@@ -60,13 +63,10 @@ class RegisterView(generics.CreateAPIView):
 
         activation_link = f'{settings.FRONTEND_URL}/pages/auth/activate.html?uid={uidb64}&token={token}'
 
-        with open(os.path.join(settings.BASE_DIR, 'static/images/videoflix_logo.jpg'), 'rb') as f:
-            logo_base64 = base64.b64encode(f.read()).decode('utf-8')
-
         html_content = render_to_string('emails/confirm_email.html', {
             'activation_link': activation_link,
             'user_name': user.first_name or user.username,
-            'logo_base64': logo_base64,})
+            'logo_base64': settings.LOGO_BASE64,})
 
         text_content = f'Hi {user.email}, please activate your account: {activation_link}'
 
@@ -97,6 +97,7 @@ class ActivateAccountView(generics.GenericAPIView):
     - The token is validated
     - The account is activated if valid
     """
+    permission_classes = [AllowAny]
 
     def get(self, request, uidb64, token):
         """
@@ -138,6 +139,7 @@ class LoginView(APIView):
     - Generates JWT access + refresh tokens
     - Stores both tokens in HTTP-only cookies
     """
+    permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
         """
@@ -247,6 +249,8 @@ class RefreshTokenView(APIView):
 
 
 class PasswordResetView(APIView):
+    permission_classes = [AllowAny]
+
     def post(self, request, *args, **kwargs):
         """
         Handle POST requests to initiate a password reset.
@@ -273,12 +277,9 @@ class PasswordResetView(APIView):
         token = default_token_generator.make_token(user)
         reset_link =(f'{settings.FRONTEND_URL}/pages/auth/confirm_password.html?uid={uidb64}&token={token}')
 
-        with open(os.path.join(settings.BASE_DIR, 'static/images/videoflix_logo.jpg'), 'rb') as f:
-            logo_base64 = base64.b64encode(f.read()).decode('utf-8')
-
         html_content = render_to_string('emails/password_reset_email.html',{
             'reset_link': reset_link, 
-            'logo_base64': logo_base64,})
+            'logo_base64': settings.LOGO_BASE64,})
 
         text_content = f'Hi {user.email}, click the link to reset your password: {reset_link}'
 
@@ -308,7 +309,7 @@ class PasswordConfirmView(APIView):
     - Validates the new password via serializer
     - Updates the user's password
     """
-
+    permission_classes = [AllowAny]
 
     def post(self, request, uidb64, token, *args, **kwargs):
         """
@@ -333,7 +334,7 @@ class PasswordConfirmView(APIView):
         serializer = PasswordResetConfirmSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        new_password = request.data.get('new_password')
+        new_password = serializer.validated_data['new_password']
         user.set_password(new_password)
         user.save()
 

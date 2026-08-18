@@ -1,6 +1,7 @@
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.core.validators import FileExtensionValidator
 import django_rq
 
 
@@ -25,7 +26,7 @@ class Video(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     thumbnail = models.ImageField(upload_to='thumbnails/')
-    file = models.FileField(upload_to='videos/')
+    file = models.FileField(upload_to='videos/', validators=[FileExtensionValidator(allowed_extensions=['mp4', 'mov', 'avi', 'mkv'])])
     category = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -50,7 +51,9 @@ def enqueue_conversion(sender, instance, created, **kwargs):
     The worker will then execute FFmpeg to generate HLS playlists and segments.
     """
         
-    if created:
+    if created and not getattr(instance, '_conversion_enqueued', False):
         queue = django_rq.get_queue('default')
         queue.enqueue(convert_to_hls_job, instance.file.path, instance.id)
+        instance._conversion_enqueued = True
+
         
