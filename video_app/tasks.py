@@ -127,15 +127,10 @@ def convert_to_hls_job(input_path: str, video_id: int) -> str:
             /1080p/index.m3u8
                   000.ts, 001.ts, ...
     """
-    
     if not os.path.isfile(input_path):
         raise HLSConversionError(f'Input file not found: {input_path}')
 
-    source_height = _probe_source_height(input_path)
-
-    variants_to_encode = [
-        v for v in RESOLUTION_LADDER if v[1] <= source_height
-    ] or [RESOLUTION_LADDER[0]]
+    variants_to_encode = RESOLUTION_LADDER
 
     final_base_dir = os.path.join(settings.MEDIA_ROOT, 'videos', str(video_id))
 
