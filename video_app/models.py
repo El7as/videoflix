@@ -5,7 +5,7 @@ from django.core.validators import FileExtensionValidator
 import django_rq
 
 
-from .tasks import convert_to_hls_job
+from .tasks2 import convert_to_hls_job
 
 
 class Video(models.Model):
