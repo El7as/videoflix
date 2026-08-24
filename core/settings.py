@@ -18,6 +18,10 @@ from datetime import timedelta
 
 load_dotenv()
 
+def env_list(key, default=""):
+    value = os.environ.get(key, default)
+    return [item.strip() for item in value.split(",") if item.strip()]
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -26,7 +30,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', default='django-insecure-@@u&2wg3g+r*&zosv@
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')
 AUTH_USER_MODEL = 'auth_app.User'
-FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://127.0.0.1:5500')
+FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:5500')
 
 # LOGGING
 LOGGING = {
