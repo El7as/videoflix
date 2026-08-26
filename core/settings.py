@@ -172,7 +172,7 @@ SIMPLE_JWT = {
     'AUTH_COOKIE_PATH': '/',
     'AUTH_COOKIE_SAMESITE': 'Lax',
 
-    'ACCESS_TOKEN_LIFETIME': timedelta(hours=12),  
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=24),  
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),   
 }
 
